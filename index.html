@@ -3,14 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SentinelConvert</title>
-    <meta name="description" content="Convert any file to any format. Drop a file or folder and SentinelConvert will detect what it can become." />
+    <title>SentinelConvert — Free File Converter</title>
+    <meta name="description" content="Convert images, video, audio, CSV/JSON and create ZIP archives — 100% in your browser. No upload, no server, total privacy." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6189259537245687" crossorigin="anonymous"></script>
+
+    <!-- COI Service Worker for SharedArrayBuffer (ffmpeg.wasm) -->
+    <script src="coi-serviceworker.js"></script>
   </head>
   <body>
     <div class="bg-orb orb-a"></div>
@@ -20,10 +24,15 @@
       <header class="app-header">
         <span class="logo-mark">⬡</span>
         <h1 class="app-title">SentinelConvert</h1>
-        <p class="app-sub">Drop a file or folder — we'll figure out the rest.</p>
+        <p class="app-sub">Drop a file or folder — everything converts in your browser. No upload needed.</p>
+        <div class="badges">
+          <span class="badge">🔒 100% Private</span>
+          <span class="badge">☁️ No Server</span>
+          <span class="badge">⚡ Free Forever</span>
+        </div>
       </header>
 
-      <!-- Ad Unit 1: Below header -->
+      <!-- Ad Unit 1 -->
       <div class="ad-slot" aria-label="Advertisement">
         <span class="ad-label">Advertisement</span>
         <ins class="adsbygoogle"
@@ -45,13 +54,19 @@
           </svg>
         </div>
         <p class="drop-label">Click or drag files here</p>
-        <p class="drop-sub">Single file or entire folder — supports images, video, audio, docs, archives, CSV/JSON</p>
+        <p class="drop-sub">Images, video, audio, CSV/JSON, ZIP — all processed locally in your browser</p>
         <input id="fileInput" type="file" multiple hidden />
         <input id="folderInput" type="file" webkitdirectory multiple hidden />
         <div class="drop-btns">
           <button type="button" id="btnPickFile" class="pick-btn">📄 Pick Files</button>
           <button type="button" id="btnPickFolder" class="pick-btn">📁 Pick Folder</button>
         </div>
+      </div>
+
+      <!-- Global loading indicator for heavy libs -->
+      <div id="globalLoader" class="global-loader hidden">
+        <div class="loader-bar"><div id="loaderProgress" class="loader-fill"></div></div>
+        <p id="loaderText" class="loader-text">Loading...</p>
       </div>
 
       <!-- File Queue -->
@@ -64,7 +79,7 @@
         <ul id="fileList" class="file-list" aria-label="Files to convert"></ul>
       </section>
 
-      <!-- Ad Unit 2: Below file queue -->
+      <!-- Ad Unit 2 -->
       <div class="ad-slot" aria-label="Advertisement">
         <span class="ad-label">Advertisement</span>
         <ins class="adsbygoogle"
@@ -77,6 +92,9 @@
       </div>
     </main>
 
-    <script src="/static/app.js" defer></script>
+    <!-- JSZip (lightweight, always loaded) -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <script src="app.js" defer></script>
   </body>
 </html>

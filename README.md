@@ -1,67 +1,56 @@
 # SentinelConvert
 
-SentinelConvert is a local web system for multi-format conversion and image background removal.
+100% client-side file converter. Everything runs in your browser — no files are ever uploaded to a server.
 
-## What it does
+## Features
 
-- Converts image files between common image formats (png, jpg, jpeg, webp, bmp, tiff, gif, ico).
-- Exports images to svg by embedding the converted raster image in an SVG wrapper.
-- Converts media files (audio/video) through FFmpeg when FFmpeg is installed.
-- Converts documents through Pandoc when Pandoc is installed.
-- Converts structured files between CSV and JSON natively.
-- Packages any file into archive formats (zip, tar, tar.gz, tar.bz2, tar.xz).
-- Removes image backgrounds using `rembg`.
+- **Image conversion** — PNG, JPG, WEBP, BMP, GIF, SVG (via Canvas API)
+- **AI Background removal** — Remove image backgrounds using on-device AI model
+- **Video/Audio conversion** — MP4, WEBM, MKV, AVI, MP3, WAV, OGG, FLAC (via ffmpeg.wasm)
+- **CSV ↔ JSON** — Convert structured data formats
+- **ZIP archive** — Create ZIP files from multiple uploads
+- **Folder batch** — Drop an entire folder and convert each file individually
 
-## Important limitation
+## How it works
 
-A true "every file to every file" converter does not exist universally because formats have incompatible content models. This system provides a broad conversion engine with plugin-style fallbacks:
+All processing happens locally in your browser using:
 
-- Native conversion when possible.
-- FFmpeg for media.
-- Pandoc for documents.
+- **Canvas API** for image format conversion (zero dependencies, native browser)
+- **@imgly/background-removal** for AI-powered background removal (ONNX model runs in WebAssembly)
+- **ffmpeg.wasm** for audio/video conversion (FFmpeg compiled to WebAssembly)
+- **JSZip** for archive creation
+- **Pure JavaScript** for CSV ↔ JSON
 
-## Setup (Windows PowerShell)
+No backend server is needed. Host it anywhere as static files.
 
-1. Create and activate a virtual environment:
+## Privacy
 
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+Your files **never leave your device**. There is no server processing. Everything is computed locally using your browser's CPU/GPU.
 
-2. Install dependencies:
+## Deploy
 
-   ```powershell
-   pip install -r requirements.txt
-   ```
+### GitHub Pages (free)
 
-3. Optional but recommended:
+1. Push this repo to GitHub
+2. Go to **Settings → Pages → Source: main branch**
+3. Your site is live at `https://yourusername.github.io/SentinalConvert`
 
-   - Install FFmpeg and add it to PATH for audio/video conversion.
-   - Install Pandoc and add it to PATH for document conversion.
+### Vercel / Netlify (free)
 
-4. Start the app:
+1. Connect your GitHub repo
+2. Deploy — no build step needed
 
-   ```powershell
-   uvicorn app.main:app --reload
-   ```
+### Local development
 
-5. Open browser:
+```bash
+npx serve .
+```
 
-   - <http://127.0.0.1:8000>
-
-## API endpoints
-
-- `GET /api/health`
-- `GET /api/capabilities`
-- `POST /api/convert`
-  - form-data: `file`, `target_format`
-- `POST /api/image/process`
-  - form-data: `file`, `target_format`, `remove_background`
+Then open http://localhost:3000
 
 ## Notes
 
-- Background removal quality depends on model performance in `rembg`.
-- The first background-removal request can be slower because `rembg` may download and warm up its model.
-- Converting transparent images to JPEG will flatten transparency to white.
-- SVG export preserves pixels (embedded PNG in SVG) rather than true vector tracing.
+- **First-time loading**: Background removal (~40MB AI model) and video conversion (~31MB FFmpeg engine) download on first use. They are cached by your browser after that.
+- **Browser support**: Works best in Chrome/Edge. Firefox and Safari support most features.
+- **SVG export**: Embeds raster image as base64 in SVG wrapper (not true vector tracing).
+- **Document conversion**: Not supported client-side (Pandoc has no browser build).

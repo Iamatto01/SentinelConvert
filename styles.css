@@ -59,7 +59,7 @@ body {
 /* Header */
 .app-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 .logo-mark {
   font-size: 2.2rem;
@@ -77,6 +77,22 @@ body {
   margin-top: 0.4rem;
   color: var(--muted);
   font-size: 0.95rem;
+}
+.badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 20px;
+  background: rgba(108,99,255,0.12);
+  border: 1px solid rgba(108,99,255,0.25);
+  color: var(--accent);
 }
 
 /* Drop Zone */
@@ -136,6 +152,33 @@ body {
 .pick-btn:hover {
   background: rgba(255,255,255,0.1);
   border-color: var(--accent);
+}
+
+/* Global loader */
+.global-loader {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.loader-bar {
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.loader-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent), #06b6d4);
+  transition: width 0.3s ease;
+}
+.loader-text {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.45rem;
 }
 
 /* File Queue */
@@ -277,7 +320,7 @@ body {
   height: 13px;
 }
 
-/* File controls (right column) */
+/* File controls */
 .file-controls {
   display: flex;
   flex-direction: column;
@@ -387,4 +430,13 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .app { padding: 1.5rem 0 2rem; }
+  .app-title { font-size: 1.5rem; }
+  .drop-zone { padding: 2rem 1rem; }
+  .badges { gap: 0.35rem; }
+  .badge { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
 }
