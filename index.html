@@ -24,6 +24,44 @@
     <!-- The entire app renders here -->
     <main id="app"></main>
 
+    <!-- Floating feedback button -->
+    <button id="feedbackBtn" class="feedback-btn" aria-label="Send feedback">✉ Feedback</button>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="feedback-modal">
+      <div class="feedback-modal-content">
+        <div class="feedback-modal-header">
+          <h2>Send Feedback</h2>
+          <button class="feedback-modal-close" id="feedbackCloseBtn">✕</button>
+        </div>
+        <form id="feedbackForm" class="feedback-form">
+          <div class="form-group">
+            <label for="feedbackEmail">Email <span class="required">*</span></label>
+            <input type="email" id="feedbackEmail" name="email" required placeholder="your@email.com" />
+          </div>
+          <div class="form-group">
+            <label for="feedbackCategory">Category</label>
+            <select id="feedbackCategory" name="category">
+              <option value="suggestion">Suggestion</option>
+              <option value="bug">Bug Report</option>
+              <option value="feature">Feature Request</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="feedbackMessage">Message <span class="required">*</span></label>
+            <textarea id="feedbackMessage" name="message" required placeholder="Tell us what you think..." rows="5"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="feedbackCancelBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Send Feedback</button>
+          </div>
+          <div id="feedbackStatus" class="feedback-status"></div>
+        </form>
+      </div>
+      <div class="feedback-modal-backdrop" id="feedbackBackdrop"></div>
+    </div>
+
     <!-- CDN Libraries (lightweight ones loaded upfront) -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

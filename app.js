@@ -25,7 +25,25 @@ function adSlotHTML() {
     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6189259537245687" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
   </div>`;
 }
-function pushAds() { try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){} }
+function refreshAdSlots() {
+  document.querySelectorAll(".ad-slot .adsbygoogle").forEach((ins) => {
+    const slot = ins.closest(".ad-slot");
+    if (!slot) return;
+
+    const status = ins.getAttribute("data-ad-status");
+    if (status === "unfilled") {
+      slot.classList.add("ad-slot-empty");
+      return;
+    }
+
+    slot.classList.remove("ad-slot-empty");
+  });
+}
+function pushAds() {
+  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+  setTimeout(refreshAdSlots, 800);
+  setTimeout(refreshAdSlots, 2000);
+}
 
 /* ── Router ── */
 const app = document.getElementById("app");
@@ -206,9 +224,60 @@ function clearResults(parent) {
   if (area) area.innerHTML = "";
 }
 
+/* ── Feedback Modal ── */
+function initFeedbackModal() {
+  const feedbackBtn = document.getElementById("feedbackBtn");
+  const feedbackModal = document.getElementById("feedbackModal");
+  const feedbackForm = document.getElementById("feedbackForm");
+  const feedbackCloseBtn = document.getElementById("feedbackCloseBtn");
+  const feedbackCancelBtn = document.getElementById("feedbackCancelBtn");
+  const feedbackBackdrop = document.getElementById("feedbackBackdrop");
+  const feedbackStatus = document.getElementById("feedbackStatus");
+
+  function openModal() {
+    feedbackModal.classList.add("active");
+    feedbackForm.reset();
+    feedbackStatus.textContent = "";
+    feedbackStatus.className = "feedback-status";
+  }
+
+  function closeModal() {
+    feedbackModal.classList.remove("active");
+  }
+
+  feedbackBtn.addEventListener("click", openModal);
+  feedbackCloseBtn.addEventListener("click", closeModal);
+  feedbackCancelBtn.addEventListener("click", closeModal);
+  feedbackBackdrop.addEventListener("click", closeModal);
+
+  feedbackForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("feedbackEmail").value;
+    const category = document.getElementById("feedbackCategory").value;
+    const message = document.getElementById("feedbackMessage").value;
+
+    // Build mailto link with all form data
+    const subject = `SentinelConvert Feedback: ${category}`;
+    const body = `From: ${email}\nCategory: ${category}\n\n${message}`;
+    const mailtoLink = `mailto:muhammadsaifudinmj@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Show success message
+    feedbackStatus.textContent = "✓ Opening your email client...";
+    feedbackStatus.className = "feedback-status success";
+
+    // Open email client
+    window.location.href = mailtoLink;
+
+    // Close modal after a moment
+    setTimeout(closeModal, 1500);
+  });
+}
+
 /* ── Init: load tools then render ── */
 window.addEventListener("DOMContentLoaded", () => {
   // Tools are registered via separate <script> files
   // Wait a tick to ensure all tool scripts have run
   setTimeout(handleRoute, 0);
+  initFeedbackModal();
 });
