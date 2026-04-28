@@ -75,7 +75,7 @@ async function convertImg(file, ext, quality) {
 /* Image Background Removal */
 let bgModule = null;
 registerTool({
-  id: "image-bg-remove", name: "Remove Background", icon: "✨", desc: "AI-powered background removal",
+  id: "image-bg-remove", name: "Remove Background", icon: "✨", desc: "AI-powered background removal (Note: first try is slow)",
   category: "Image Tools", catIcon: "🖼️",
   render(body) {
     let file = null;
@@ -94,7 +94,7 @@ registerTool({
       clearResults(body);
       try {
         if (!bgModule) {
-          showStatus(body, "Downloading AI model (first time only, ~40MB)…", "loading");
+          showStatus(body, "Downloading AI model (first time only, ~40MB)...", "loading");
           bgModule = await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm");
         }
         showStatus(body, "Removing background…", "loading");
@@ -102,6 +102,88 @@ registerTool({
         clearStatus(body);
         addResult(body, blob, `${stem(file.name)}_nobg.png`);
         showStatus(body, "Background removed!", "ok");
+      } catch(e) { showStatus(body, "Error: " + e.message, "error"); }
+    });
+  }
+});
+
+/* Resize Image Tool */
+registerTool({
+  id: "image-resize", name: "Resize Image", icon: "📐", desc: "Change the dimensions of an image",
+  category: "Image Tools", catIcon: "🖼️",
+  render(body) {
+    let file = null;
+    let originalImg = null;
+
+    createDropZone(body, {
+      accept: "image/*", multiple: false,
+      label: "Drop an image here", sublabel: "Resize by percentage or exact pixels",
+      onFiles: async (f) => { 
+        file = f[0]; 
+        createFileList(body, [file], { onRemove: () => { file=null; originalImg=null; } });
+        try {
+            originalImg = await loadImg(file);
+            showStatus(body, `Original size: ${originalImg.naturalWidth} x ${originalImg.naturalHeight} px`, "ok");
+            document.getElementById("resizeWidth").value = originalImg.naturalWidth;
+            document.getElementById("resizeHeight").value = originalImg.naturalHeight;
+        } catch(e) {}
+      }
+    });
+
+    const opts = document.createElement("div"); opts.className = "opts-panel";
+    opts.innerHTML = `
+      <div class="opt-group"><span class="opt-label">Width (px):</span>
+      <input type="number" id="resizeWidth" class="opt-input" style="width:80px" /></div>
+      <div class="opt-group"><span class="opt-label">Height (px):</span>
+      <input type="number" id="resizeHeight" class="opt-input" style="width:80px" /></div>
+      <div class="opt-group">
+      <input type="checkbox" id="keepRatio" class="opt-checkbox" checked />
+      <span class="opt-label">Keep aspect ratio</span></div>`;
+    body.appendChild(opts);
+
+    // Aspect ratio logic
+    let wInput = opts.querySelector("#resizeWidth");
+    let hInput = opts.querySelector("#resizeHeight");
+    let ratioCheck = opts.querySelector("#keepRatio");
+
+    wInput.addEventListener("input", () => {
+        if (ratioCheck.checked && originalImg) {
+            hInput.value = Math.round(wInput.value * (originalImg.naturalHeight / originalImg.naturalWidth));
+        }
+    });
+    hInput.addEventListener("input", () => {
+        if (ratioCheck.checked && originalImg) {
+            wInput.value = Math.round(hInput.value * (originalImg.naturalWidth / originalImg.naturalHeight));
+        }
+    });
+
+    const row = document.createElement("div"); row.className = "action-row";
+    row.innerHTML = `<button class="btn-action" id="btnResize">📐 Resize Image</button>`;
+    body.appendChild(row);
+
+    row.querySelector("#btnResize").addEventListener("click", async () => {
+      if (!file || !originalImg) return showStatus(body, "Add an image first", "error");
+      clearResults(body); showStatus(body, "Resizing…", "loading");
+      
+      const targetW = parseInt(wInput.value);
+      const targetH = parseInt(hInput.value);
+
+      if (!targetW || !targetH) return showStatus(body, "Invalid dimensions", "error");
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = targetW; canvas.height = targetH;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(originalImg, 0, 0, targetW, targetH);
+
+        const ext = getExt(file.name) === 'png' ? 'png' : 'jpeg';
+        const mime = `image/${ext}`;
+
+        const blob = await new Promise(res => canvas.toBlob(res, mime, 0.92));
+        
+        clearStatus(body);
+        addResult(body, blob, `${stem(file.name)}_resized.${ext}`);
+        showStatus(body, `Resized to ${targetW}x${targetH} px!`, "ok");
       } catch(e) { showStatus(body, "Error: " + e.message, "error"); }
     });
   }

@@ -131,7 +131,114 @@ registerTool({
   }
 });
 
-function parsePageRange(str, max) {
+/* PDF Rotate Tool */
+registerTool({
+  id: "pdf-rotate", name: "Rotate PDF", icon: "↻", desc: "Rotate PDF pages by 90, 180, or 270 degrees",
+  category: "PDF Tools", catIcon: "📄",
+  render(body) {
+    let file = null;
+    createDropZone(body, {
+      accept: ".pdf", multiple: false,
+      label: "Drop a PDF file here", sublabel: "Rotates all pages in the PDF",
+      onFiles(f) { file = f[0]; createFileList(body, [file], { onRemove: () => file=null }); }
+    });
+
+    const opts = document.createElement("div"); opts.className = "opts-panel";
+    opts.innerHTML = `<div class="opt-group"><span class="opt-label">Rotation:</span>
+      <select class="opt-select" id="rotAngle">
+        <option value="90">90° Clockwise</option>
+        <option value="180">180° (Upside Down)</option>
+        <option value="270">90° Counter-Clockwise</option>
+      </select></div>`;
+    body.appendChild(opts);
+
+    const row = document.createElement("div"); row.className = "action-row";
+    row.innerHTML = `<button class="btn-action" id="btnRotate">↻ Rotate PDF</button>`;
+    body.appendChild(row);
+
+    row.querySelector("#btnRotate").addEventListener("click", async () => {
+      if (!file) return showStatus(body, "Add a PDF file first", "error");
+      const angle = +document.getElementById("rotAngle").value;
+      clearResults(body); showStatus(body, "Rotating PDF…", "loading");
+      try {
+        const { PDFDocument, degrees } = PDFLib;
+        const src = await PDFDocument.load(await file.arrayBuffer());
+        
+        const pages = src.getPages();
+        pages.forEach(p => {
+          const currentRotation = p.getRotation().angle;
+          p.setRotation(degrees(currentRotation + angle));
+        });
+
+        const bytes = await src.save();
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        clearStatus(body);
+        addResult(body, blob, `${stem(file.name)}_rotated.pdf`);
+        showStatus(body, "PDF rotated successfully!", "ok");
+      } catch(e) { showStatus(body, "Error: " + e.message, "error"); }
+    });
+  }
+});
+
+/* PDF Page Numbers Tool */
+registerTool({
+  id: "pdf-pagenums", name: "Add Page Numbers", icon: "🔢", desc: "Add page numbers to your PDF",
+  category: "PDF Tools", catIcon: "📄",
+  render(body) {
+    let file = null;
+    createDropZone(body, {
+      accept: ".pdf", multiple: false,
+      label: "Drop a PDF file here", sublabel: "Adds page numbers to the bottom of each page",
+      onFiles(f) { file = f[0]; createFileList(body, [file], { onRemove: () => file=null }); }
+    });
+
+    const opts = document.createElement("div"); opts.className = "opts-panel";
+    opts.innerHTML = `<div class="opt-group"><span class="opt-label">Format:</span>
+      <select class="opt-select" id="numFmt">
+        <option value="1">1, 2, 3...</option>
+        <option value="Page 1">Page 1, Page 2...</option>
+        <option value="1 of 10">1 of n, 2 of n...</option>
+      </select></div>`;
+    body.appendChild(opts);
+
+    const row = document.createElement("div"); row.className = "action-row";
+    row.innerHTML = `<button class="btn-action" id="btnAddNums">🔢 Add Numbers</button>`;
+    body.appendChild(row);
+
+    row.querySelector("#btnAddNums").addEventListener("click", async () => {
+      if (!file) return showStatus(body, "Add a PDF file first", "error");
+      const fmt = document.getElementById("numFmt").value;
+      clearResults(body); showStatus(body, "Adding page numbers…", "loading");
+      try {
+        const { PDFDocument, rgb } = PDFLib;
+        const src = await PDFDocument.load(await file.arrayBuffer());
+        
+        const pages = src.getPages();
+        const total = pages.length;
+
+        pages.forEach((p, i) => {
+          let txt = `${i + 1}`;
+          if (fmt === "Page 1") txt = `Page ${i + 1}`;
+          if (fmt === "1 of 10") txt = `${i + 1} of ${total}`;
+
+          const { width, height } = p.getSize();
+          p.drawText(txt, {
+            x: width / 2 - (txt.length * 4), // Rough center approximation
+            y: 20, // 20 units from bottom
+            size: 12,
+            color: rgb(0, 0, 0)
+          });
+        });
+
+        const bytes = await src.save();
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        clearStatus(body);
+        addResult(body, blob, `${stem(file.name)}_numbered.pdf`);
+        showStatus(body, "Page numbers added!", "ok");
+      } catch(e) { showStatus(body, "Error: " + e.message, "error"); }
+    });
+  }
+});
   const indices = new Set();
   str.split(",").forEach(part => {
     part = part.trim();

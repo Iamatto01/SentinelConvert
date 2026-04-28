@@ -25,7 +25,7 @@ async function ensureFFmpeg(progressCallback) {
 }
 
 registerTool({
-  id: "media-convert", name: "Video/Audio Converter", icon: "🎬", desc: "Convert between video and audio formats",
+  id: "media-convert", name: "Video/Audio Converter", icon: "🎬", desc: "Convert between video and audio formats (Note: first try is slow)",
   category: "Media Tools", catIcon: "🎞️",
   render(body) {
     let file = null;
@@ -100,7 +100,7 @@ registerTool({
 
 /* Extract Audio Tool */
 registerTool({
-  id: "extract-audio", name: "Extract Audio", icon: "🎵", desc: "Extract MP3 audio from a video file",
+  id: "extract-audio", name: "Extract Audio", icon: "🎵", desc: "Extract MP3 audio from a video file (Note: first try is slow)",
   category: "Media Tools", catIcon: "🎞️",
   render(body) {
     let file = null;
