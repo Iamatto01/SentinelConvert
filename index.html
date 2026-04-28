@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SentinelConvert — Free File Converter</title>
-    <meta name="description" content="Convert images, video, audio, CSV/JSON and create ZIP archives — 100% in your browser. No upload, no server, total privacy." />
+    <title>SentinelConvert — Free Student Toolkit</title>
+    <meta name="description" content="Free online tools for students: Merge PDF, Split PDF, Convert images, Remove backgrounds, and more — 100% in your browser, no upload needed." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
 
     <!-- Google AdSense -->
@@ -19,82 +19,21 @@
   <body>
     <div class="bg-orb orb-a"></div>
     <div class="bg-orb orb-b"></div>
+    <div class="bg-orb orb-c"></div>
 
-    <main class="app">
-      <header class="app-header">
-        <span class="logo-mark">⬡</span>
-        <h1 class="app-title">SentinelConvert</h1>
-        <p class="app-sub">Drop a file or folder — everything converts in your browser. No upload needed.</p>
-        <div class="badges">
-          <span class="badge">🔒 100% Private</span>
-          <span class="badge">☁️ No Server</span>
-          <span class="badge">⚡ Free Forever</span>
-        </div>
-      </header>
+    <!-- The entire app renders here -->
+    <main id="app"></main>
 
-      <!-- Ad Unit 1 -->
-      <div class="ad-slot" aria-label="Advertisement">
-        <span class="ad-label">Advertisement</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-6189259537245687"
-             data-ad-slot="auto"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      </div>
-
-      <!-- Drop Zone -->
-      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload file or folder">
-        <div class="drop-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        </div>
-        <p class="drop-label">Click or drag files here</p>
-        <p class="drop-sub">Images, video, audio, CSV/JSON, ZIP — all processed locally in your browser</p>
-        <input id="fileInput" type="file" multiple hidden />
-        <input id="folderInput" type="file" webkitdirectory multiple hidden />
-        <div class="drop-btns">
-          <button type="button" id="btnPickFile" class="pick-btn">📄 Pick Files</button>
-          <button type="button" id="btnPickFolder" class="pick-btn">📁 Pick Folder</button>
-        </div>
-      </div>
-
-      <!-- Global loading indicator for heavy libs -->
-      <div id="globalLoader" class="global-loader hidden">
-        <div class="loader-bar"><div id="loaderProgress" class="loader-fill"></div></div>
-        <p id="loaderText" class="loader-text">Loading...</p>
-      </div>
-
-      <!-- File Queue -->
-      <section id="fileQueue" class="file-queue hidden" aria-label="File queue">
-        <div class="queue-header">
-          <span id="queueCount" class="queue-count">0 files</span>
-          <button type="button" id="btnClearAll" class="btn-ghost">Clear all</button>
-          <button type="button" id="btnConvertAll" class="btn-primary">Convert All</button>
-        </div>
-        <ul id="fileList" class="file-list" aria-label="Files to convert"></ul>
-      </section>
-
-      <!-- Ad Unit 2 -->
-      <div class="ad-slot" aria-label="Advertisement">
-        <span class="ad-label">Advertisement</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-6189259537245687"
-             data-ad-slot="auto"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      </div>
-    </main>
-
-    <!-- JSZip (lightweight, always loaded) -->
+    <!-- CDN Libraries (lightweight ones loaded upfront) -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
     <script src="app.js" defer></script>
+    <script src="tools/pdf-tools.js" defer></script>
+    <script src="tools/pdf-convert.js" defer></script>
+    <script src="tools/image-tools.js" defer></script>
+    <script src="tools/data-tools.js" defer></script>
   </body>
 </html>
