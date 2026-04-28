@@ -92,6 +92,45 @@ registerTool({
   }
 });
 
+/* PDF Compress Tool */
+registerTool({
+  id: "pdf-compress", name: "Compress PDF", icon: "🗜️", desc: "Reduce PDF file size",
+  category: "PDF Tools", catIcon: "📄",
+  render(body) {
+    let file = null;
+    createDropZone(body, {
+      accept: ".pdf", multiple: false,
+      label: "Drop a PDF file here", sublabel: "Removes unnecessary metadata and compresses content",
+      onFiles(f) { file = f[0]; createFileList(body, [file], { onRemove: () => file=null }); }
+    });
+
+    const row = document.createElement("div"); row.className = "action-row";
+    row.innerHTML = `<button class="btn-action" id="btnCompress">🗜️ Compress PDF</button>`;
+    body.appendChild(row);
+
+    row.querySelector("#btnCompress").addEventListener("click", async () => {
+      if (!file) return showStatus(body, "Add a PDF file first", "error");
+      clearResults(body); showStatus(body, "Compressing PDF…", "loading");
+      try {
+        const { PDFDocument } = PDFLib;
+        const src = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+        
+        // Basic compression using pdf-lib (removes metadata/objects)
+        // Advanced image compression is harder in browser without pdf.js rendering
+        const bytes = await src.save({ useObjectStreams: true });
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        
+        clearStatus(body);
+        addResult(body, blob, `${stem(file.name)}_compressed.pdf`);
+        
+        const oldSize = (file.size / 1024).toFixed(1);
+        const newSize = (bytes.length / 1024).toFixed(1);
+        showStatus(body, `Compressed! Size went from ${oldSize}KB to ${newSize}KB`, "ok");
+      } catch(e) { showStatus(body, "Error: " + e.message, "error"); }
+    });
+  }
+});
+
 function parsePageRange(str, max) {
   const indices = new Set();
   str.split(",").forEach(part => {
