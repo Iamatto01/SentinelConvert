@@ -255,8 +255,14 @@ function initFeedbackModal() {
 
     const message = document.getElementById("feedbackMessage").value;
 
-    // Web3Forms configuration (Needs Access Key)
-    const accessKey = "f5e3f8ac-0048-400e-83ac-48670db43a75"; // User will replace this
+    // Web3Forms configuration
+    const accessKey = "f5e3f8ac-0048-400e-83ac-48670db43a75";
+    
+    // Create FormData
+    const formData = new FormData();
+    formData.append("access_key", accessKey);
+    formData.append("subject", "New Anonymous Feedback from SentinelConvert");
+    formData.append("message", message);
     
     // Show loading state
     feedbackStatus.textContent = "Sending feedback anonymously...";
@@ -264,15 +270,7 @@ function initFeedbackModal() {
 
     fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        access_key: accessKey,
-        subject: "New Anonymous Feedback from SentinelConvert",
-        message: message
-      })
+      body: formData
     })
     .then(async (response) => {
       let json = await response.json();
