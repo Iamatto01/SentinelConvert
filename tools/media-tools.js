@@ -98,9 +98,9 @@ registerTool({
   }
 });
 
-/* Extract Audio Tool */
+/* Video to MP3 Tool */
 registerTool({
-  id: "extract-audio", name: "Extract Audio", icon: "🎵", desc: "Extract MP3 audio from a video file (Note: first try is slow)",
+  id: "extract-audio", name: "Video to MP3", icon: "🎵", desc: "Convert a video file into an MP3 audio file (Note: first try is slow)",
   category: "Media Tools", catIcon: "🎞️",
   render(body) {
     let file = null;
@@ -111,7 +111,7 @@ registerTool({
     });
 
     const row = document.createElement("div"); row.className = "action-row";
-    row.innerHTML = `<button class="btn-action" id="btnExtractAudio">🎵 Extract MP3</button>`;
+    row.innerHTML = `<button class="btn-action" id="btnExtractAudio">🎵 Convert to MP3</button>`;
     body.appendChild(row);
 
     row.querySelector("#btnExtractAudio").addEventListener("click", async () => {

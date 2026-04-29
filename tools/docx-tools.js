@@ -65,6 +65,98 @@ registerTool({
     });
   }
 });
+/* PDF → DOCX Tool */
+registerTool({
+  id: "pdf-to-docx", name: "PDF to DOCX", icon: "📝", desc: "Extract text from PDF to a Word document",
+  category: "Document Tools", catIcon: "📝",
+  render(body) {
+    let file = null;
+    createDropZone(body, {
+      accept: ".pdf", multiple: false,
+      label: "Drop a PDF file here", sublabel: "Extracts text to a DOCX file (Images & Layouts not supported)",
+      onFiles(f) { file = f[0]; createFileList(body, [file], { onRemove: () => file=null }); }
+    });
+
+    const row = document.createElement("div"); row.className = "action-row";
+    row.innerHTML = `<button class="btn-action" id="btnConvertPdfToDocx">📝 Extract Text to DOCX</button>`;
+    body.appendChild(row);
+
+    row.querySelector("#btnConvertPdfToDocx").addEventListener("click", async () => {
+      if (!file) return showStatus(body, "Add a PDF file first", "error");
+      clearResults(body); showStatus(body, "Extracting text from PDF…", "loading");
+
+      try {
+        if (typeof docx === "undefined") {
+            await loadScript("https://unpkg.com/docx@8.2.3/build/index.js");
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const totalPages = pdf.numPages;
+        
+        const docxParagraphs = [];
+
+        for (let i = 1; i <= totalPages; i++) {
+          showStatus(body, `Reading page ${i} of ${totalPages}…`, "loading");
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          
+          // Simple heuristic: group text by checking Y coordinates
+          // For simplicity in a client-side tool, we'll just join items into basic paragraphs
+          let currentY = null;
+          let currentLine = [];
+          
+          textContent.items.forEach(item => {
+             // item.transform[5] is the Y coordinate
+             const y = Math.round(item.transform[5]);
+             if (currentY === null) currentY = y;
+             
+             if (Math.abs(y - currentY) > 5) {
+                 // New line
+                 docxParagraphs.push(new docx.Paragraph({
+                    children: [new docx.TextRun(currentLine.join(" "))]
+                 }));
+                 currentLine = [];
+                 currentY = y;
+             }
+             currentLine.push(item.str);
+          });
+          
+          if (currentLine.length > 0) {
+             docxParagraphs.push(new docx.Paragraph({
+                children: [new docx.TextRun(currentLine.join(" "))]
+             }));
+          }
+          
+          // Add spacing between pages
+          if (i < totalPages) {
+             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("")] }));
+             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("--- Page Break ---")] }));
+             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("")] }));
+          }
+        }
+
+        showStatus(body, "Creating DOCX…", "loading");
+
+        const doc = new docx.Document({
+          sections: [{
+            properties: {},
+            children: docxParagraphs
+          }]
+        });
+
+        const blob = await docx.Packer.toBlob(doc);
+
+        clearStatus(body);
+        addResult(body, blob, `${stem(file.name)}.docx`);
+        showStatus(body, "Text extracted to DOCX successfully!", "ok");
+
+      } catch (e) {
+        showStatus(body, "Error: " + e.message, "error");
+      }
+    });
+  }
+});
 
 // Helper to dynamically load scripts if not present
 function loadScript(src) {

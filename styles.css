@@ -140,25 +140,32 @@ body {
 /* ── Floating Feedback Button ── */
 .feedback-btn {
   position: fixed;
-  top: 1rem;
-  right: 1rem;
+  bottom: 2rem;
+  right: 2rem;
   z-index: 1200;
-  background: linear-gradient(90deg,var(--accent),var(--cyan));
-  color: #fff;
-  padding: 0.45rem 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.7rem 1.2rem;
   border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
   text-decoration: none;
-  border: none;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(12,10,30,0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: transform 0.2s ease;
+  gap: 0.6rem;
+  transition: all 0.3s ease;
 }
-.feedback-btn:hover { transform: translateY(-2px); }
+.feedback-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 8px 32px var(--accent-glow);
+  transform: translateY(-3px);
+}
 .feedback-btn:active { transform: translateY(0); }
 
 /* ── Feedback Modal ── */
@@ -186,10 +193,12 @@ body {
   z-index: -1;
 }
 .feedback-modal-content {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(15, 15, 20, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   width: min(500px, calc(100% - 2rem));
   max-height: 90vh;
   overflow-y: auto;
@@ -352,7 +361,7 @@ body {
 }
 
 @media (max-width: 520px) {
-  .feedback-btn { top: 0.6rem; right: 0.6rem; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
+  .feedback-btn { bottom: 1rem; right: 1rem; padding: 0.5rem 0.9rem; font-size: 0.85rem; }
 }
 
 ::-webkit-scrollbar { width: 5px; }

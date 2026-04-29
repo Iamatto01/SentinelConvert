@@ -253,13 +253,11 @@ function initFeedbackModal() {
   feedbackForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("feedbackEmail").value;
-    const category = document.getElementById("feedbackCategory").value;
     const message = document.getElementById("feedbackMessage").value;
 
-    // Build mailto link with all form data
-    const subject = `SentinelConvert Feedback: ${category}`;
-    const body = `From: ${email}\nCategory: ${category}\n\n${message}`;
+    // Build mailto link with comment
+    const subject = `SentinelConvert Feedback`;
+    const body = `${message}`;
     const mailtoLink = `mailto:muhammadsaifudinmj@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     // Show success message
