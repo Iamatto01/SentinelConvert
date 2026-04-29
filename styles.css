@@ -137,6 +137,12 @@ body {
 /* ── Utilities ── */
 .hidden { display: none !important; }
 
+/* ── API Status Badge ── */
+.api-status { padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border); background: var(--surface); transition: all 0.3s; }
+.api-status.checking { color: var(--warn); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.05); }
+.api-status.up { color: var(--ok); border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); box-shadow: 0 0 10px rgba(52,211,153,0.1); }
+.api-status.down { color: var(--err); border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+
 /* ── Floating Feedback Button ── */
 .feedback-btn {
   position: fixed;
