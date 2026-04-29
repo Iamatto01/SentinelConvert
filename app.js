@@ -256,7 +256,7 @@ function initFeedbackModal() {
     const message = document.getElementById("feedbackMessage").value;
 
     // Web3Forms configuration (Needs Access Key)
-    const accessKey = "YOUR_WEB3FORMS_ACCESS_KEY_HERE"; // User will replace this
+    const accessKey = "f5e3f8ac-0048-400e-83ac-48670db43a75"; // User will replace this
     
     // Show loading state
     feedbackStatus.textContent = "Sending feedback anonymously...";
