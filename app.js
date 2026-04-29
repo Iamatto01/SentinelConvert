@@ -255,20 +255,42 @@ function initFeedbackModal() {
 
     const message = document.getElementById("feedbackMessage").value;
 
-    // Build mailto link with comment
-    const subject = `SentinelConvert Feedback`;
-    const body = `${message}`;
-    const mailtoLink = `mailto:muhammadsaifudinmj@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Web3Forms configuration (Needs Access Key)
+    const accessKey = "YOUR_WEB3FORMS_ACCESS_KEY_HERE"; // User will replace this
+    
+    // Show loading state
+    feedbackStatus.textContent = "Sending feedback anonymously...";
+    feedbackStatus.className = "feedback-status loading";
 
-    // Show success message
-    feedbackStatus.textContent = "✓ Opening your email client...";
-    feedbackStatus.className = "feedback-status success";
-
-    // Open email client
-    window.location.href = mailtoLink;
-
-    // Close modal after a moment
-    setTimeout(closeModal, 1500);
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        access_key: accessKey,
+        subject: "New Anonymous Feedback from SentinelConvert",
+        message: message
+      })
+    })
+    .then(async (response) => {
+      let json = await response.json();
+      if (response.status === 200) {
+        feedbackStatus.textContent = "✓ Feedback sent anonymously! Thank you.";
+        feedbackStatus.className = "feedback-status success";
+        setTimeout(closeModal, 2000);
+      } else {
+        console.error("Web3Forms error:", json);
+        feedbackStatus.textContent = "Error sending feedback. Please try again.";
+        feedbackStatus.className = "feedback-status error";
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      feedbackStatus.textContent = "Network error. Failed to send feedback.";
+      feedbackStatus.className = "feedback-status error";
+    });
   });
 }
 
