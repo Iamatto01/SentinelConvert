@@ -41,17 +41,21 @@ registerTool({
         const slides = [];
 
         // PPTX slide files are the authoritative source for slide count.
+        // Use case-insensitive matching and normalize path separators.
         const slideFiles = Object.keys(zip.files)
-          .filter(path => /^ppt\/slides\/slide\d+\.xml$/.test(path))
+          .filter(path => /^ppt[\/\\]slides[\/\\]slide\d+\.xml$/i.test(path))
           .sort((a, b) => {
-            const aNum = parseInt(a.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
-            const bNum = parseInt(b.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
+            const aNum = parseInt(a.match(/slide(\d+)\.xml$/i)?.[1] || "0", 10);
+            const bNum = parseInt(b.match(/slide(\d+)\.xml$/i)?.[1] || "0", 10);
             return aNum - bNum;
           });
 
         const slideCount = slideFiles.length;
         if (!slideCount) {
-          throw new Error("No slide XML files found in the PPTX archive");
+          // Debug: log all files in the ZIP for diagnostics
+          const allPaths = Object.keys(zip.files).filter(p => !p.endsWith("/"));
+          console.error("PPTX archive contents:", allPaths);
+          throw new Error(`No slide XML files found in the PPTX archive. Files found: ${allPaths.slice(0, 10).join(", ")}`);
         }
 
         // Extract text from slides
@@ -141,16 +145,9 @@ registerTool({
 
         // Create presentation
         const pres = new PptxGenJS();
-        pres.defineLayout({ name: 'LAYOUT1', master: 'MASTER1' });
-
-        // Define master slide
-        pres.defineMaster({
-          name: 'MASTER1',
-          background: { color: 'FFFFFF' },
-          objects: [
-            { placeholder: { options: { name: 'body', type: 'body', x: 0.5, y: 0.5, w: 9.0, h: 6.5 }, text: '' } }
-          ]
-        });
+        // Set standard widescreen layout (10x7.5 inches)
+        pres.defineLayout({ name: 'CUSTOM', width: 10, height: 7.5 });
+        pres.layout = 'CUSTOM';
 
         // Process each PDF page
         for (let i = 1; i <= totalPages; i++) {
@@ -212,10 +209,26 @@ registerTool({
 /* ── Helper Functions ── */
 
 function extractTextFromSlideXml(xml) {
-  // Simple XML parsing to extract text
-  const textMatches = xml.match(/<a:t>([^<]*)<\/a:t>/g) || [];
+  // Parse slide XML to extract text content from <a:t> tags.
+  // Use DOMParser for reliable XML parsing instead of regex.
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, "application/xml");
+    // Get all text elements — they can be namespaced (a:t) or plain (t)
+    const textNodes = doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "t");
+    const parts = [];
+    for (let i = 0; i < textNodes.length; i++) {
+      const txt = textNodes[i].textContent;
+      if (txt) parts.push(txt);
+    }
+    if (parts.length > 0) return parts.join(" ");
+  } catch (e) {
+    // Fallback to regex if DOMParser fails
+  }
+  // Regex fallback: match both <a:t> and any namespace variant
+  const textMatches = xml.match(/<[^>]*:t>([^<]*)<\/[^>]*:t>/g) || xml.match(/<a:t>([^<]*)<\/a:t>/g) || [];
   return textMatches
-    .map(match => match.replace(/<\/?a:t>/g, ''))
+    .map(match => match.replace(/<[^>]*>/g, ''))
     .join(' ');
 }
 
