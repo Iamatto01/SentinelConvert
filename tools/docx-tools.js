@@ -86,9 +86,16 @@ registerTool({
       clearResults(body); showStatus(body, "Extracting text from PDF…", "loading");
 
       try {
-        if (typeof docx === "undefined") {
+        // Load docx library if not present
+        if (typeof window.docx === "undefined") {
+            showStatus(body, "Loading DOCX library…", "loading");
             await loadScript("https://unpkg.com/docx@8.2.3/build/index.js");
+            // Wait a bit for the library to initialize
+            await new Promise(r => setTimeout(r, 100));
         }
+
+        const docxLib = window.docx;
+        if (!docxLib) throw new Error("DOCX library failed to load. Please try again.");
 
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -102,20 +109,19 @@ registerTool({
           const textContent = await page.getTextContent();
           
           // Simple heuristic: group text by checking Y coordinates
-          // For simplicity in a client-side tool, we'll just join items into basic paragraphs
           let currentY = null;
           let currentLine = [];
           
           textContent.items.forEach(item => {
-             // item.transform[5] is the Y coordinate
              const y = Math.round(item.transform[5]);
              if (currentY === null) currentY = y;
              
              if (Math.abs(y - currentY) > 5) {
-                 // New line
-                 docxParagraphs.push(new docx.Paragraph({
-                    children: [new docx.TextRun(currentLine.join(" "))]
-                 }));
+                 if (currentLine.length > 0) {
+                    docxParagraphs.push(new docxLib.Paragraph({
+                       children: [new docxLib.TextRun(currentLine.join(" "))]
+                    }));
+                 }
                  currentLine = [];
                  currentY = y;
              }
@@ -123,36 +129,42 @@ registerTool({
           });
           
           if (currentLine.length > 0) {
-             docxParagraphs.push(new docx.Paragraph({
-                children: [new docx.TextRun(currentLine.join(" "))]
+             docxParagraphs.push(new docxLib.Paragraph({
+                children: [new docxLib.TextRun(currentLine.join(" "))]
              }));
           }
           
-          // Add spacing between pages
           if (i < totalPages) {
-             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("")] }));
-             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("--- Page Break ---")] }));
-             docxParagraphs.push(new docx.Paragraph({ children: [new docx.TextRun("")] }));
+             docxParagraphs.push(new docxLib.Paragraph({ children: [new docxLib.TextRun("")] }));
+             docxParagraphs.push(new docxLib.Paragraph({ children: [new docxLib.TextRun("--- Page Break ---")] }));
           }
         }
 
         showStatus(body, "Creating DOCX…", "loading");
 
-        const doc = new docx.Document({
+        const doc = new docxLib.Document({
           sections: [{
             properties: {},
             children: docxParagraphs
           }]
         });
 
-        const blob = await docx.Packer.toBlob(doc);
+        let blob;
+        if (docxLib.Packer && typeof docxLib.Packer.toBlob === "function") {
+           blob = await docxLib.Packer.toBlob(doc);
+        } else if (docxLib.Packer && typeof docxLib.Packer.toBuffer === "function") {
+           const buffer = await docxLib.Packer.toBuffer(doc);
+           blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        } else {
+           throw new Error("DOCX Packer API not available");
+        }
 
         clearStatus(body);
         addResult(body, blob, `${stem(file.name)}.docx`);
         showStatus(body, "Text extracted to DOCX successfully!", "ok");
 
       } catch (e) {
-        showStatus(body, "Error: " + e.message, "error");
+        showStatus(body, "Error: " + e.message + " — Try again or use a simpler PDF.", "error");
       }
     });
   }
@@ -160,11 +172,18 @@ registerTool({
 
 // Helper to dynamically load scripts if not present
 function loadScript(src) {
+  // Check if script is already loaded
+  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+  
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
-    script.onload = resolve;
+    script.onload = () => {
+      // Give the script time to initialize
+      setTimeout(resolve, 100);
+    };
     script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
     document.head.appendChild(script);
   });
 }
+
