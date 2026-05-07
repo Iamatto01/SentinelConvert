@@ -119,7 +119,7 @@ registerTool({
         // Load PptxGenJS if not present
         if (typeof PptxGenJS === "undefined") {
             showStatus(body, "Loading presentation generator…", "loading");
-            await loadLibrary("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.umd.min.js", "PptxGenJS");
+            await loadPptxLibrary();
         }
 
         const arrayBuffer = await file.arrayBuffer();
@@ -209,20 +209,31 @@ function extractTextFromSlideXml(xml) {
 }
 
 async function loadPptxLibrary() {
-  if (document.querySelector(`script[src*="pptxgen"]`)) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.umd.min.js";
-    script.onload = () => setTimeout(resolve, 100);
-    script.onerror = () => reject(new Error("Failed to load PptxGenJS"));
-    document.head.appendChild(script);
-  });
+  if (typeof PptxGenJS !== "undefined") return Promise.resolve();
+
+  const candidates = [
+    "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js",
+    "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js",
+    "https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.min.js",
+    "https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"
+  ];
+
+  let lastError = null;
+  for (const src of candidates) {
+    try {
+      await loadLibrary(src, "PptxGenJS");
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(`Failed to load PptxGenJS: ${lastError ? lastError.message : "no CDN candidates succeeded"}`);
 }
 
 async function loadLibrary(src, globalName) {
   if (window[globalName]) return Promise.resolve();
-  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
-  
+
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
