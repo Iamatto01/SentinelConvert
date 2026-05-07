@@ -40,19 +40,30 @@ registerTool({
         const zip = await JSZip.loadAsync(arrayBuffer);
         const slides = [];
 
-        // Get slide count from presentation.xml
-        const presentationXml = await zip.file("ppt/presentation.xml").async("string");
-        const slideCount = (presentationXml.match(/slide/g) || []).length;
+        // PPTX slide files are the authoritative source for slide count.
+        const slideFiles = Object.keys(zip.files)
+          .filter(path => /^ppt\/slides\/slide\d+\.xml$/.test(path))
+          .sort((a, b) => {
+            const aNum = parseInt(a.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
+            const bNum = parseInt(b.match(/slide(\d+)\.xml$/)?.[1] || "0", 10);
+            return aNum - bNum;
+          });
+
+        const slideCount = slideFiles.length;
+        if (!slideCount) {
+          throw new Error("No slide XML files found in the PPTX archive");
+        }
 
         // Extract text from slides
-        for (let i = 1; i <= slideCount; i++) {
-          showStatus(body, `Processing slide ${i} of ${slideCount}…`, "loading");
-          const slideFile = `ppt/slides/slide${i}.xml`;
+        for (let i = 0; i < slideFiles.length; i++) {
+          const slideFile = slideFiles[i];
+          const slideNumber = i + 1;
+          showStatus(body, `Processing slide ${slideNumber} of ${slideCount}…`, "loading");
           const slideXml = await zip.file(slideFile).async("string");
           
           // Extract text from the slide XML
           const slideText = extractTextFromSlideXml(slideXml);
-          slides.push({ index: i, text: slideText });
+          slides.push({ index: slideNumber, text: slideText });
         }
 
         showStatus(body, "Creating PDF…", "loading");
