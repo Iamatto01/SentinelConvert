@@ -50,25 +50,6 @@ registerTool({
   }
 });
 
-function getExt(filename) {
-  const parts = filename.split('.');
-  return parts.length > 1 ? parts.pop().toLowerCase() : '';
-}
-
-function loadImg(file) {
-  return new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = () => rej(new Error("Invalid image"));
-      img.src = e.target.result;
-    };
-    reader.onerror = () => rej(new Error("Read failed"));
-    reader.readAsDataURL(file);
-  });
-}
-
 async function convertImg(file, ext, quality) {
   const img = await loadImg(file);
   const canvas = document.createElement("canvas");

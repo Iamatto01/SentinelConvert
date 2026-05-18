@@ -169,21 +169,3 @@ registerTool({
     });
   }
 });
-
-// Helper to dynamically load scripts if not present
-function loadScript(src) {
-  // Check if script is already loaded
-  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
-  
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = () => {
-      // Give the script time to initialize
-      setTimeout(resolve, 100);
-    };
-    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-    document.head.appendChild(script);
-  });
-}
-

@@ -99,12 +99,3 @@ registerTool({
   }
 });
 
-function loadImg(file) {
-  return new Promise((res, rej) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => res(img);
-    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Failed to load image")); };
-    img.src = url;
-  });
-}

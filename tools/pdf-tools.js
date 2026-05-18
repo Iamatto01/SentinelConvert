@@ -239,6 +239,9 @@ registerTool({
     });
   }
 });
+
+/* ── Page Range Parser ── */
+function parsePageRange(str, max) {
   const indices = new Set();
   str.split(",").forEach(part => {
     part = part.trim();

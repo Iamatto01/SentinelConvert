@@ -246,14 +246,17 @@ registerTool({
     `;
     body.appendChild(row);
 
-    const input = body.querySelector("#inputInput");
+
     const textInput = body.querySelector("#base64Input");
 
     body.querySelector("#btnEncode").addEventListener("click", () => {
       const text = textInput.value;
       if (!text) return showStatus(body, "Enter text first", "error");
       try {
-        const encoded = btoa(unescape(encodeURIComponent(text)));
+        const bytes = new TextEncoder().encode(text);
+        let binary = '';
+        bytes.forEach(b => binary += String.fromCharCode(b));
+        const encoded = btoa(binary);
         textInput.value = encoded;
         addResult(body, new Blob([encoded], { type: "text/plain" }), "encoded.txt");
         showStatus(body, "Encoded to Base64", "ok");
@@ -266,7 +269,10 @@ registerTool({
       const encoded = textInput.value;
       if (!encoded) return showStatus(body, "Enter Base64 string first", "error");
       try {
-        const decoded = decodeURIComponent(escape(atob(encoded)));
+        const binary = atob(encoded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const decoded = new TextDecoder().decode(bytes);
         textInput.value = decoded;
         addResult(body, new Blob([decoded], { type: "text/plain" }), "decoded.txt");
         showStatus(body, "Decoded from Base64", "ok");
@@ -347,9 +353,11 @@ registerTool({
       if (useNumbers) chars += "0123456789";
       if (useSpecial) chars += "!@#$%^&*()-_=+[]{}|;:,.<>?";
 
+      const array = new Uint32Array(length);
+      crypto.getRandomValues(array);
       let password = "";
       for (let i = 0; i < length; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
+        password += chars.charAt(array[i] % chars.length);
       }
 
       document.getElementById("pwOutput").value = password;
@@ -386,13 +394,4 @@ function sortObjectKeys(obj) {
   return obj;
 }
 
-function loadScript(src) {
-  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = () => setTimeout(resolve, 100);
-    script.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.appendChild(script);
-  });
-}
+

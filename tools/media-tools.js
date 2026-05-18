@@ -230,7 +230,3 @@ registerTool({
   }
 });
 
-function getExt(filename) {
-  const parts = filename.split('.');
-  return parts.length > 1 ? parts.pop().toLowerCase() : '';
-}

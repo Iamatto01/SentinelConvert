@@ -402,3 +402,37 @@ body {
 .btn-page-ctrl { background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; }
 .btn-page-ctrl:hover { background: var(--accent); }
 .btn-page-ctrl.del:hover { background: var(--err); }
+
+/* ── Input Fields (used by text/utility tools) ── */
+.input-container { margin-top: 1rem; }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.input-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+.input-field {
+  width: 100%; padding: 0.8rem 1rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font: inherit; font-size: 0.9rem; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; resize: vertical;
+}
+.input-field::placeholder { color: var(--muted); }
+.input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.input-hint { display: block; margin-top: 0.3rem; font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+/* ── Image Crop Tool ── */
+.crop-container { position: relative; margin-top: 1rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.crop-canvas { max-width: 100%; max-height: 500px; display: block; }
+
+/* ── Color Picker Tool ── */
+.color-preview-bar { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.color-swatch { width: 80px; height: 80px; border-radius: var(--radius-sm); border: 2px solid var(--border); flex-shrink: 0; transition: background 0.2s; }
+.color-values { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+.color-value-row { display: flex; align-items: center; gap: 0.5rem; }
+.color-value-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; width: 40px; flex-shrink: 0; }
+.color-value-input { flex: 1; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-xs); padding: 0.35rem 0.6rem; font-family: monospace; font-size: 0.82rem; outline: none; }
+.color-value-input:focus { border-color: var(--accent); }
+
+/* ── Footer ── */
+.site-footer { text-align: center; margin-top: 3rem; padding: 2rem 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; }
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.footer-links { display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap; }
+

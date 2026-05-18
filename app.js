@@ -18,6 +18,37 @@ function humanSize(b) { if(b<1024) return b+" B"; if(b<1048576) return (b/1024).
 function stem(f) { const d=f.lastIndexOf("."); return d>0?f.slice(0,d):f; }
 function download(blob, name) { const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
 
+/* ── Shared Utilities (used by multiple tools) ── */
+function getExt(filename) {
+  const parts = filename.split('.');
+  return parts.length > 1 ? parts.pop().toLowerCase() : '';
+}
+
+function loadImg(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = () => rej(new Error("Invalid image"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => rej(new Error("Read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadScript(src) {
+  if (document.querySelector(`script[src="${src}"]`)) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => setTimeout(resolve, 100);
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
 /* ── Ad HTML ── */
 function adSlotHTML() {
   return `<div class="ad-slot" aria-label="Advertisement">
@@ -99,6 +130,16 @@ function renderHome() {
   }
 
   html += adSlotHTML();
+  html += `<footer class="site-footer">
+    <p>SentinelConvert v3.1 — Made with ❤️ for students everywhere</p>
+    <div class="footer-links">
+      <span>🔒 100% Private</span>
+      <span>•</span>
+      <span>☁️ No Server Uploads</span>
+      <span>•</span>
+      <span>⚡ Free Forever</span>
+    </div>
+  </footer>`;
   app.innerHTML = html;
 
   // Search
